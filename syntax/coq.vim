@@ -37,42 +37,29 @@ if !exists('b:coqtail_did_highlight') || !b:coqtail_did_highlight
     elseif &t_Co > 16
       if &background ==# 'dark'
         hi def CoqtailChecked ctermbg=17 guibg=#113311
-        hi def CoqtailSent    ctermbg=60 guibg=#007630
+        hi def CoqtailSent ctermbg=60 guibg=#007630
       else
-        hi def CoqtailChecked ctermbg=157 guibg=LightGreen
-        hi def CoqtailSent    ctermbg=40  guibg=LimeGreen
+        hi def CoqtailChecked ctermbg=17 guibg=LightGreen
+        hi def CoqtailSent ctermbg=60 guibg=LimeGreen
       endif
     else
       hi def CoqtailChecked ctermbg=4 guibg=LightGreen
-      hi def CoqtailSent    ctermbg=7 guibg=LimeGreen
+      hi def CoqtailSent ctermbg=7 guibg=LimeGreen
     endif
-    hi def link CoqtailDiffAdded     DiffText
-    hi def link CoqtailDiffAddedBg   DiffChange
-    hi def link CoqtailDiffRemoved   DiffDelete
+    hi def link CoqtailDiffAdded DiffText
+    hi def link CoqtailDiffAddedBg DiffChange
+    hi def link CoqtailDiffRemoved DiffDelete
     hi def link CoqtailDiffRemovedBg DiffDelete
-    hi def link CoqtailError         Error
-    hi def link CoqtailOmitted       coqProofAdmit
+    hi def link CoqtailError Error
+    hi def link CoqtailOmitted coqProofAdmit
   endfunction
 
   call s:CoqtailHighlight()
-  " NOTE: Setting a colorscheme usually calls 'hi clear' so have to set
+  " NOTE: Setting a colorscheme usually calls 'syntax clear' so have to set
   " Coqtail highlighting colors again
   augroup coqtail_highlight
     autocmd!
     autocmd ColorScheme * call s:CoqtailHighlight()
-
-    if exists('##TermResponseAll')
-      " This file is sourced before Vim detects the correct background value,
-      " the autocommand updates the highlights after Vim receives the response
-      " from the terminal.
-      autocmd TermResponseAll *
-            \ if expand("<amatch>") ==# 'background'
-            \ |   hi clear CoqtailChecked
-            \ |   hi clear CoqtailSent
-            \ |   call s:CoqtailHighlight()
-            \ | endif
-    endif
-
   augroup END
 endif
 let b:coqtail_did_highlight = 1
@@ -88,7 +75,7 @@ endif
 setlocal iskeyword=@,48-57,192-255,_,'
 syn iskeyword clear
 
-" Rocq is case sensitive.
+" Coq is case sensitive.
 syn case match
 
 " Various
@@ -120,11 +107,30 @@ syn cluster coqTerm            contains=coqKwd,coqTermPunctuation,coqKwdMatch,co
 syn region coqKwdMatch         contained contains=@coqTerm matchgroup=coqKwd start="\<match\>" end="\<with\>"
 syn region coqKwdLet           contained contains=@coqTerm matchgroup=coqKwd start="\<let\>"   end=":="
 syn region coqKwdParen         contained contains=@coqTerm matchgroup=coqTermPunctuation start="(" end=")" keepend extend
-syn keyword coqKwd             contained else end exists2 fix cofix forall fun if in struct then as return
+syn keyword coqKwd             contained else end exists2 fix cofix if in struct then as return
+syn keyword coqKwd             contained forall conceal cchar=∀
+syn keyword coqKwd             contained fun conceal cchar=λ
+syn match coqKwd               contained /\/\\/ conceal cchar=∧
+syn match coqKwd               contained /\\\// conceal cchar=∨
+syn match   coqKwd             contained "\~" conceal cchar=¬
 syn match   coqKwd             contained "\<where\>"
-syn match   coqKwd             contained "\<exists!\?\>"
-syn match   coqKwd             contained "|\|/\\\|\\/\|<->\|\~\|->\|=>\|{\|}\|&\|+\|-\|*\|=\|>\|<\|<="
+syn match   coqKwd             contained "\<exists!\?\>" conceal cchar=∃
+syn match   coqKwd             contained "|\|<->\|->\|=>\|{\|}\|&\|+\|-\|*\|=\|>\|<\|<="
 syn match coqTermPunctuation   contained ":=\|:>\|:\|;\|,\|||\|\[\|\]\|@\|?\|\<_\>\|<+"
+
+syn match coqSub0 "\%([a-zA-Z]\d*\)\@<=\(0\d*\>\)\@=0" conceal cchar=₀ containedin=ALL
+syn match coqSub1 "\%([a-zA-Z]\d*\)\@<=\(1\d*\>\)\@=1" conceal cchar=₁ containedin=ALL
+syn match coqSub2 "\%([a-zA-Z]\d*\)\@<=\(2\d*\>\)\@=2" conceal cchar=₂ containedin=ALL
+syn match coqSub3 "\%([a-zA-Z]\d*\)\@<=\(3\d*\>\)\@=3" conceal cchar=₃ containedin=ALL
+syn match coqSub4 "\%([a-zA-Z]\d*\)\@<=\(4\d*\>\)\@=4" conceal cchar=₄ containedin=ALL
+syn match coqSub5 "\%([a-zA-Z]\d*\)\@<=\(5\d*\>\)\@=5" conceal cchar=₅ containedin=ALL
+syn match coqSub6 "\%([a-zA-Z]\d*\)\@<=\(6\d*\>\)\@=6" conceal cchar=₆ containedin=ALL
+syn match coqSub7 "\%([a-zA-Z]\d*\)\@<=\(7\d*\>\)\@=7" conceal cchar=₇ containedin=ALL
+syn match coqSub8 "\%([a-zA-Z]\d*\)\@<=\(8\d*\>\)\@=8" conceal cchar=₈ containedin=ALL
+syn match coqSub9 "\%([a-zA-Z]\d*\)\@<=\(9\d*\>\)\@=9" conceal cchar=₉ containedin=ALL
+
+highlight clear Conceal
+highlight link Conceal coqKwd
 
 " Various
 syn region coqRequire contains=coqString matchgroup=coqVernacCmd start="\<Require\>\%(\_s\+\%(Export\|Import\)\>\)\?" matchgroup=coqVernacPunctuation end="\.\_s"
@@ -321,16 +327,15 @@ syn region coqLtac2Notation contained contains=coqProofPunctuation,coqString mat
 " TODO: The \ze in the start match is a terrible hack so coqProofDelim will still
 " be matched and the dot will be highlighted as coqProofDot. I assume there is a
 " better way but I don't know what it is.
-syn region coqProofBody  contains=coqProofPunctuation,coqTactic,coqTacticKwd,coqTacticAdmit,coqProofComment,coqProofKwd,coqProofEnder,coqProofDelim,coqLtac,coqString,coqAttribute matchgroup=coqProofDelim start="\<P\zeroof\>" start="\<\%(O\zebligation\_s\+\d\+\)\|\%(N\zeext\_s\+Obligation\)\|\%(F\zeinal\_s\+Obligation\)\>" matchgroup=NONE end="\<\%(Qed\|Defined\|Admitted\|Abort\)\.\_s" end="\<Save\>.*\.\_s" keepend
+syn region coqProofBody  contains=coqProofPunctuation,coqTactic,coqTacticKwd,coqTacticAdmit,coqProofComment,coqProofKwd,coqProofEnder,coqProofDelim,coqLtac,coqString,coqAttribute matchgroup=coqProofDelim start="\<P\zeroof\>" start="\<\%(O\zebligation\_s\+\d\+\)\|\%(N\zeext\_s\+Obligation\)\>" matchgroup=NONE end="\<\%(Qed\|Defined\|Admitted\|Abort\)\.\_s" end="\<Save\>.*\.\_s" keepend
 syn region coqProofDelim contained matchgroup=coqProofDelim start="\%(\<P\)\@1<=roof\>" matchgroup=coqProofDot end="\.\_s"
-syn region coqProofDelim contained contains=coqOblOfDelim start="\%(\%(\<O\)\@1<=bligation\_s\+\d\+\)\|\%(\%(\<N\)\@1<=ext\_s\+Obligation\)\|\%(\%(\<F\)\@1<=inal\_s\+Obligation\)\>" matchgroup=coqProofDot end="\.\_s" keepend
+syn region coqProofDelim contained contains=coqOblOfDelim start="\%(\%(\<O\)\@1<=bligation\_s\+\d\+\)\|\%(\%(\<N\)\@1<=ext\_s\+Obligation\)\>" matchgroup=coqProofDot end="\.\_s" keepend
 syn region coqProofEnder contained matchgroup=coqProofDelim start="\<\%(Qed\|Defined\)\>" matchgroup=coqVernacPunctuation end="\.\_s"
 syn region coqProofEnder contained matchgroup=coqProofAdmit start="\<\%(Abort\|Admitted\)\>" matchgroup=coqVernacPunctuation end="\.\_s"
 syn region coqProofEnder contained contains=coqIdent matchgroup=coqProofDelim start="\<Save\>" matchgroup=coqVernacPunctuation end="\.\_s"
-" NOTE: Don't expect a proof body after `Fail Proof`, `Fail Next Obligation`,
-" or `Fail Final Obligation`.
+" NOTE: Don't expect a proof body after `Fail Proof` or `Fail Next Obligation`.
 " Must come after `coqProofBody`.
-syn region coqProofFail  matchgroup=coqProofDelim start="\%(\<Fail\>\_s\+\)\@<=\%(Proof\|\%(Obligation\_s\+\d\+\)\|\%(Next\_s\+Obligation\)\|\%(Final\_s\+Obligation\)\)\>" end="\.\_s" keepend
+syn region coqProofFail  matchgroup=coqProofDelim start="\%(\<Fail\>\_s\+\)\@<=\%(Proof\|\%(Obligation\_s\+\d\+\)\|\%(Next\_s\+Obligation\)\)\>" end="\.\_s" keepend
 
 syn keyword coqTactic    contained abstract absurd apply assert assert_fails assert_succeeds assumption auto autoapply
 syn keyword coqTactic    contained autorewrite autounfold autounfold_one

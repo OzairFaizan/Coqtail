@@ -49,11 +49,27 @@ syn cluster coqTerm            contains=coqKwd,coqTermPunctuation,coqKwdMatch,co
 syn region coqKwdMatch         contained contains=@coqTerm matchgroup=coqKwd start="\<match\>" end="\<with\>"
 syn region coqKwdLet           contained contains=@coqTerm matchgroup=coqKwd start="\<let\>"   end=":="
 syn region coqKwdParen         contained contains=@coqTerm matchgroup=coqTermPunctuation start="(" end=")" keepend extend
-syn keyword coqKwd             contained else end exists2 fix forall fun if in struct then as return
+syn keyword coqKwd             contained else end exists2 fix if in struct then as return
+syn keyword coqKwd             contained forall conceal cchar=∀
+syn keyword coqKwd             contained fun conceal cchar=λ
+syn match coqKwd               contained /\/\\/ conceal cchar=∧
+syn match coqKwd               contained /\\\// conceal cchar=∨
+syn match   coqKwd             contained "\~" conceal cchar=¬
 syn match   coqKwd             contained "\<where\>"
-syn match   coqKwd             contained "\<exists!\?\>"
-syn match   coqKwd             contained "|\|/\\\|\\/\|<->\|\~\|->\|=>\|{\|}\|&\|+\|-\|*\|=\|>\|<\|<="
+syn match   coqKwd             contained "\<exists!\?\>" conceal cchar=∃
+syn match   coqKwd             contained "|\|<->\|->\|=>\|{\|}\|&\|+\|-\|*\|=\|>\|<\|<="
 syn match coqTermPunctuation   contained ":=\|:>\|:\|;\|,\|||\|\[\|\]\|@\|?\|\<_\>"
+
+syn match coqSub0 "\%([a-zA-Z]\d*\)\@<=\(0\d*\>\)\@=0" conceal cchar=₀ containedin=ALL
+syn match coqSub1 "\%([a-zA-Z]\d*\)\@<=\(1\d*\>\)\@=1" conceal cchar=₁ containedin=ALL
+syn match coqSub2 "\%([a-zA-Z]\d*\)\@<=\(2\d*\>\)\@=2" conceal cchar=₂ containedin=ALL
+syn match coqSub3 "\%([a-zA-Z]\d*\)\@<=\(3\d*\>\)\@=3" conceal cchar=₃ containedin=ALL
+syn match coqSub4 "\%([a-zA-Z]\d*\)\@<=\(4\d*\>\)\@=4" conceal cchar=₄ containedin=ALL
+syn match coqSub5 "\%([a-zA-Z]\d*\)\@<=\(5\d*\>\)\@=5" conceal cchar=₅ containedin=ALL
+syn match coqSub6 "\%([a-zA-Z]\d*\)\@<=\(6\d*\>\)\@=6" conceal cchar=₆ containedin=ALL
+syn match coqSub7 "\%([a-zA-Z]\d*\)\@<=\(7\d*\>\)\@=7" conceal cchar=₇ containedin=ALL
+syn match coqSub8 "\%([a-zA-Z]\d*\)\@<=\(8\d*\>\)\@=8" conceal cchar=₈ containedin=ALL
+syn match coqSub9 "\%([a-zA-Z]\d*\)\@<=\(9\d*\>\)\@=9" conceal cchar=₉ containedin=ALL
 
 " Various (High priority)
 syn region  coqString            start=+"+ skip=+""+ end=+"+ extend

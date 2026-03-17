@@ -678,13 +678,26 @@ class Coqtail:
             else:
                 lines.append("All goals completed.")
 
+        common_hyps = []
+        if goals.fg:
+            first_goal_hyps = goals.fg[0].hyp
+            for h in first_goal_hyps:
+                if all(h in goal.hyp for goal in goals.fg[1:]):
+                    common_hyps.append(h)
+
         for idx, goal in enumerate(goals.fg):
             if idx == 0:
-                # Print the environment only for the current goal
-                for hyp in goal.hyp:
+                for hyp in common_hyps:
                     ls, hls = lines_and_highlights(hyp, len(lines))
                     lines += ls
                     highlights += hls
+                lines += [""]
+
+            unique_hyps = [h for h in goal.hyp if h not in common_hyps]
+            for hyp in unique_hyps:
+                ls, hls = lines_and_highlights(hyp, len(lines))
+                lines += ls
+                highlights += hls
 
             hbar = f"{'':=>25} ({idx + 1} / {ngoals})"
             if goal.name is not None:
@@ -694,6 +707,8 @@ class Coqtail:
             ls, hls = lines_and_highlights(goal.ccl, len(lines))
             lines += ls
             highlights += hls
+
+            lines += ["", ""]
 
         return lines, highlights
 
